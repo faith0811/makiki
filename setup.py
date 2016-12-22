@@ -6,6 +6,7 @@ entry_points = [
 ]
 
 requires = [
+    'gevent>=1.1',
 ]
 
 setup(
