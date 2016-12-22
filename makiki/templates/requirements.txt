@@ -1,0 +1,6 @@
+makiki
+sqlalchemy
+celery
+redis
+psycopg
+psycogreen
