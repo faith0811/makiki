@@ -18,22 +18,11 @@ hub = get_hub()
 hub.NOT_ERROR = (*hub.NOT_ERROR, falcon.http_status.HTTPStatus)
 
 
-def simple_http_wrapper(data=None, status=200, message='Success', code=0):
-    return {
-        'meta': {
-            'code': code,
-            'status': status,
-            'message': message,
-        },
-        'data': data,
-    }
-
-
 class FunctionExecutor(object):
 
-    def __init__(self, http_wrapper=simple_http_wrapper, sentry_client=None, timeout=5, auth_func=None, log_exclude_fields=None, identity_func=None):
-        self.http_wrapper = http_wrapper if http_wrapper else lambda res: res
-        self.sentry_clinet = sentry_client
+    def __init__(self, http_wrapper=None, sentry_client=None, timeout=5, auth_func=None, log_exclude_fields=None, identity_func=None):
+        self.http_wrapper = http_wrapper if http_wrapper else lambda d, s, m, c: d
+        self.sentry_client = sentry_client
         self.timeout = timeout
         self.auth_func = auth_func if auth_func else lambda req, func: True
         self.log_exclude_fields = log_exclude_fields if log_exclude_fields is not None else {}
@@ -42,9 +31,9 @@ class FunctionExecutor(object):
     def _http_wrapper(self, data=None, status=200, message='Success', code=0, response=None):
         if response:
             response.status = getattr(falcon, 'HTTP_{}'.format(status))
-        return self._http_wrapper(data, status, message, code)
+        return self.http_wrapper(data, status, message, code)
 
-    def _process_with_timeout(self, func, args, kwargs, request):
+    def _process_with_timeout(self, func, args, kwargs, request, response):
         with gevent.Timeout(self.timeout):
             start_sig = blinker.signal('BeforeFunctionExecute')
             start_sig.send(request)
@@ -113,7 +102,7 @@ class FunctionExecutor(object):
     def _finish_exec(self, duration, func_logger, args, kwargs, request, func):
         end_sig = blinker.signal('AfterFunctionExecute')
         end_sig.send(request)
-        func_logger.info(self._prepare_log(func.__name__, args, kwargs, duration))
+        func_logger.info(self._prepare_log(func.__name__, args, kwargs, duration, request))
 
     def __call__(self, func):
         func_logger = logging.getLogger(func.__module__)

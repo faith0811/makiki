@@ -7,13 +7,21 @@ except ImportError:
 
 import collections
 
-from .executor import (
-    FunctionExecutor,
-    simple_http_wrapper,
-)
+from .executor import FunctionExecutor
 
 
 API = collections.namedtuple('API', ['uri', 'method', 'func'])
+
+
+def simple_http_wrapper(data=None, status=200, message='Success', code=0):
+    return {
+        'meta': {
+            'code': code,
+            'status': status,
+            'message': message,
+        },
+        'data': data,
+    }
 
 
 def default_404_handler(request):
