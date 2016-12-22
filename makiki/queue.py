@@ -8,11 +8,17 @@ import functools
 
 from threading import local
 
-from celery import (
-    Celery,
-    signals,
-)
-from sqlalchemy import event
+try:
+    from celery import (
+        Celery,
+        signals,
+    )
+except ImportError:
+    raise ImportError('To use queue module, you must install celery.')
+try:
+    from sqlalchemy import event
+except:
+    event = None
 
 logger = logging.getLogger(__name__)
 async_ctx = local()
@@ -110,7 +116,10 @@ def register_to_celery(celery_broker, celery_config, func_executor, retry_wait=5
     async_api = celery_app.task(max_retries=max_retries, bind=True)(async_task)
     signals.setup_logging.connect(init_celery_log)
     if DBSession:
-        event.listens_for(DBSession, 'after_commit')(send_after_commit_tasks)
+        if event:
+            event.listens_for(DBSession, 'after_commit')(send_after_commit_tasks)
+        else:
+            raise ImportError('You must install sqlalchemy first.')
 
     return async_api
 
