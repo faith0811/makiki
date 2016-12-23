@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from makiki.executor import FunctionExecutor
-from makiki.http import generate_http_api
+from makiki.http import (
+    generate_http_api,
+    simple_http_wrapper,
+)
 
 from .urls import user_apis
 
 
-func_executor = FunctionExecutor()
+func_executor = FunctionExecutor(http_wrapper=simple_http_wrapper)
 api = generate_http_api(
     module_name=__name__,
     user_apis=user_apis,
