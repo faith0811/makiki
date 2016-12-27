@@ -5,6 +5,8 @@ try:
 except ImportError:
     raise ImportError('To use http module, you must install hug.')
 
+import functools
+import gevent
 import collections
 
 from .executor import FunctionExecutor
@@ -35,3 +37,28 @@ def generate_http_api(module_name, user_apis, executor, not_found_show_documenta
     if not not_found_show_documentation:
         hug.not_found()(not_found_handler)
     return api
+
+
+class TimeoutWrapper(object):
+
+    def __init__(self, app, timeout=15):
+        self.app = app
+        self.timeout = timeout
+
+    def __call__(self, *args, **kwargs):
+        with gevent.Timeout(self.timeout):
+            return self._gevent_wrapper(self.app)(*args, **kwargs)
+
+    def __getattr__(self, key):
+        return getattr(self.app, key)
+
+    @staticmethod
+    def _gevent_wrapper(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            task = gevent.spawn(func, *args, **kwargs)
+            task.join()
+            if not task.successful():
+                raise task.exception
+            return task.value
+        return wrapper

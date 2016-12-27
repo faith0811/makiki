@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+
+from multiprocessing import cpu_count
+from makiki.monkey import patch
+
+
+def custom_prefork(server, worker):
+    patch()
+
+
+bind = ['0.0.0.0:8000']
+workers = 2 * cpu_count() + 1
+worker_class = 'gevent'
+timeout = 5
+graceful_timeout = 15
+reload = True
+ppreload = custom_prefork

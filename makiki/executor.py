@@ -54,17 +54,6 @@ class FunctionExecutor(object):
                 })
             self.sentry_client.captureException()
 
-    @staticmethod
-    def _gevent_wrapper(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            task = gevent.spawn(func, *args, **kwargs)
-            task.join()
-            if not task.successful():
-                raise task.exception
-            return task.value
-        return wrapper
-
     def _prepare_log(self, func_name, args, kwargs, execution_time, request):
         if self.identity_func:
             kwargs['unique_identity'] = self.identity_func(request)
@@ -125,4 +114,4 @@ class FunctionExecutor(object):
             finally:
                 execution_time = (time.time() - start) * 1000
                 self._finish_exec(execution_time, func_logger, args, kwargs, request, func)
-        return self._gevent_wrapper(wrapper)
+        return wrapper

@@ -1,6 +1,5 @@
 
 import psycogreen.gevent
-psycogreen.gevent.patch_psycopg()
 
 import functools
 import json
@@ -96,6 +95,7 @@ def gather_parameters(self, request, response, api_version=None, **input_paramet
 
 
 def patch():
+    psycogreen.gevent.patch_psycopg()
     functools.wraps = wraps
     # hug.interface.Interface.documentation = documentation
     hug.interface.HTTP.gather_parameters = gather_parameters
