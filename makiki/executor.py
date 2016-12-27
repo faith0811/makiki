@@ -20,10 +20,9 @@ hub.NOT_ERROR = (*hub.NOT_ERROR, falcon.http_status.HTTPStatus)
 
 class FunctionExecutor(object):
 
-    def __init__(self, http_wrapper=None, sentry_client=None, timeout=5, auth_func=None, log_exclude_fields=None, identity_func=None):
+    def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None):
         self.http_wrapper = http_wrapper if http_wrapper else lambda d, s, m, c: d
         self.sentry_client = sentry_client
-        self.timeout = timeout
         self.auth_func = auth_func if auth_func else lambda req, func: True
         self.log_exclude_fields = log_exclude_fields if log_exclude_fields is not None else {}
         self.identity_func = identity_func
@@ -33,15 +32,14 @@ class FunctionExecutor(object):
             response.status = getattr(falcon, 'HTTP_{}'.format(status))
         return self.http_wrapper(data, status, message, code)
 
-    def _process_with_timeout(self, func, args, kwargs, request, response):
-        with gevent.Timeout(self.timeout):
-            start_sig = blinker.signal('BeforeFunctionExecute')
-            start_sig.send(request)
+    def _process(self, func, args, kwargs, request, response):
+        start_sig = blinker.signal('BeforeFunctionExecute')
+        start_sig.send(request)
 
-            if not self.auth_func(request, func):
-                raise Unauthorized
+        if not self.auth_func(request, func):
+            raise Unauthorized
 
-            return self._http_wrapper(data=func(*args, **kwargs))
+        return self._http_wrapper(data=func(*args, **kwargs))
 
     def _send_sentry_exc(self, request):
         if self.sentry_client:
@@ -106,7 +104,7 @@ class FunctionExecutor(object):
             if response:
                 del kwargs['response']
             try:
-                return self._process_with_timeout(func, args, kwargs, request, response)
+                return self._process(func, args, kwargs, request, response)
             except falcon.http_status.HTTPStatus:
                 raise
             except Exception as e:
