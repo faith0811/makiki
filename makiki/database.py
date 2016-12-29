@@ -4,6 +4,7 @@ import functools
 import logging
 import random
 
+from contextlib import contextmanager
 from threading import local
 
 from sqlalchemy import create_engine
@@ -42,7 +43,7 @@ def gen_commit_deco(DBSession):
     return wrap
 
 
-def make_pg_engine(db_conn_config, pool_size=5, max_overflow=0, pool_recycle=1200, client_encoding='utf-8'):
+def make_pg_engine(db_conn_config, pool_size=5, max_overflow=0, pool_recycle=1200, client_encoding='utf-8', echo=False, logging_name='default'):
     DEFAULT_URL = ("postgresql+psycopg2://{user}:{password}"
                    "@{host}:{port}/{database}")
     dsn = DEFAULT_URL.format(**db_conn_config)
@@ -50,6 +51,8 @@ def make_pg_engine(db_conn_config, pool_size=5, max_overflow=0, pool_recycle=120
         dsn, pool_size=pool_size, max_overflow=max_overflow,
         pool_recycle=pool_recycle,
         client_encoding=client_encoding,
+        echo=echo,
+        logging_name=logging_name,
     )
 
 
@@ -63,9 +66,13 @@ def make_session(master_engine, slave_engines=None):
             else:
                 return random.choice(slave_engines)
 
+        @contextmanager
         def using_master(self):
-            self._force_master = True
-            return self
+            try:
+                self._force_master = True
+                yield self
+            finally:
+                self._force_master = False
 
     return scoped_session(
         sessionmaker(
