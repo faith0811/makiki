@@ -2,6 +2,7 @@
 
 import functools
 import logging
+import random
 
 from threading import local
 
@@ -9,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy.orm import (
-    Session,
+    Session as _Session,
     scoped_session,
     sessionmaker,
 )
@@ -52,12 +53,24 @@ def make_pg_engine(db_conn_config, pool_size=5, max_overflow=0, pool_recycle=120
     )
 
 
-def make_session(engine):
+def make_session(master_engine, slave_engines=None):
+    class Session(_Session):
+        _force_master = False
+
+        def get_bind(self, mapper=None, clause=None):
+            if self._force_master or self._flushing or not slave_engines:
+                return master_engine
+            else:
+                return random.choice(slave_engines)
+
+        def using_master(self):
+            self._force_master = True
+            return self
+
     return scoped_session(
         sessionmaker(
             class_=Session,
             expire_on_commit=False,
             autoflush=False,
-            bind=engine,
         )
     )
