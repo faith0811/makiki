@@ -2,7 +2,8 @@
 
 from setuptools import setup, find_packages
 
-entry_points = [
+console_scripts = [
+    'makiki = makiki.cli:main_parser',
 ]
 
 requires = [
@@ -22,7 +23,7 @@ setup(
     url='http://github.com/faith0811/makiki',
     include_package_data=True,
     entry_points={
-        'console_scripts': entry_points,
+        'console_scripts': console_scripts,
     },
     zip_safe=False,
     install_requires=requires,

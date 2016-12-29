@@ -4,6 +4,11 @@ from multiprocessing import cpu_count
 from makiki.monkey import patch
 
 
+def import_wsgi():
+    from app.server import web_wsgi
+    return web_wsgi
+
+
 def custom_prefork(server, worker):
     patch()
 
