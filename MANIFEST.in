@@ -1,1 +1,1 @@
-include makiki/templates/*
+recursive-include makiki/templates *.jinja
