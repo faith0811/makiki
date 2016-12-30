@@ -10,6 +10,7 @@ requires = [
     'blinker>=1.4',
     'gevent>=1.1',
     'gunicorn>=19.0',
+    'Jinja2>=2.8.1',
 ]
 
 setup(
