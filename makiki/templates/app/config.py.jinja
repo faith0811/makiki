@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 DATABASE_CONFIG = {
-    'host': 'db',
-    'port': '5432',
-    'user': 'postgres',
-    'password': 'postgres',
-    'database': 'postgres',
+    'host': '{{ database_addr }}',
+    'port': '{{ database_port }}',
+    'user': '{{ database_user }}',
+    'password': '{{ database_password }}',
+    'database': '{{ database_db }}',
 }
 
 LOG_CONFIG = {

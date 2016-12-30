@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import subprocess
+import os
 import argparse
+from contextlib import suppress
+from jinja2 import Template
 from gunicorn.app.base import BaseApplication
 
 
@@ -15,8 +19,24 @@ def init(args):
     database_user = input('Database user (default: postgres)') or 'postgres'
     database_password = input('Database password (default: postgres)') or 'postgres'
     database_db = input('Database dbname (default: postgres)') or 'postgres'
+
+    package_infos = locals()
     # TODO: render infos into template and generate static python files.
-    print(locals())
+
+    template_path = os.path.join(os.path.dirname(__file__), 'templates')
+    for current_dir, _, files in os.walk(template_path):
+        target_dir = os.path.relpath(current_dir, template_path)
+        with suppress(FileExistsError, IsADirectoryError):
+            os.mkdir(target_dir)
+
+        for file_ in files:
+            with open(os.path.join(current_dir, file_), 'r') as f:
+                content = f.read()
+            rendered = Template(content).render(**package_infos)
+            with open(os.path.join(target_dir, file_.rstrip('.jinja')), 'w') as f:
+                f.write(rendered)
+    os.rename('app', app_name)
+    subprocess.call(['python', 'setup.py', 'develop'])
 
 
 def dev_run(args):
