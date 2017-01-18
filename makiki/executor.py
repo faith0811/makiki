@@ -57,7 +57,7 @@ class FunctionExecutor(object):
             kwargs['unique_identity'] = self.identity_func(request)
         kwargs_list = []
         for k, v in kwargs.items():
-            if k not in self.ignore_fields:
+            if k not in self.log_exclude_fields:
                 if isinstance(v, str):
                     v = "'{}'".format(v)
                 kwargs_list.append('{}={}'.format(k, v))
