@@ -16,10 +16,7 @@ from .exception import (
 )
 
 hub = get_hub()
-if sys.version_info.minor < 5:
-    hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
-else:
-    hub.NOT_ERROR = (*hub.NOT_ERROR, falcon.http_status.HTTPStatus)
+hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
 
 
 class FunctionExecutor(object):
