@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import logging
 import functools
 import time
@@ -15,7 +16,10 @@ from .exception import (
 )
 
 hub = get_hub()
-hub.NOT_ERROR = (*hub.NOT_ERROR, falcon.http_status.HTTPStatus)
+if sys.version_info.minor < 5:
+    hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
+else:
+    hub.NOT_ERROR = (*hub.NOT_ERROR, falcon.http_status.HTTPStatus)
 
 
 class FunctionExecutor(object):
