@@ -8,7 +8,7 @@ console_scripts = [
 
 requires = [
     'blinker>=1.4',
-    'gevent==1.1.2',
+    'gevent>=1.2',
     'gunicorn>=19.0',
     'Jinja2>=2.8.1',
     'psycogreen>=1.0.0',
@@ -18,7 +18,7 @@ requires = [
 
 setup(
     name='makiki',
-    version='0.1.19',
+    version='0.1.20',
     description='Web service utils and generator.',
     long_description='',
     author='Wang Yanqing',
