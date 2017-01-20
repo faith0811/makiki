@@ -102,7 +102,9 @@ def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_q
 
 
 def make_async_task(function_executor, retry_wait=5):
-    return functools.wraps(async_task)(functools.partial(async_task, function_executor=function_executor, retry_wait=retry_wait))
+    def _f(module_name, api_name, *args, **kwargs):
+        return async_task(module_name, api_name, retry_wait, function_executor, *args, **kwargs)
+    return _f
 
 
 def async_task(self, module_name, api_name, retry_wait=5, func_executor=None, *args, **kwargs):
