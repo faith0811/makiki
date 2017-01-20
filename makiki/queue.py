@@ -91,6 +91,7 @@ def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_q
         countdown=countdown,
         send_after_commit=send_after_commit,
         extra_celery_kwargs=extra_celery_kwargs,
+        apply_queue=apply_queue,
     )
     if send_after_commit:
         task.register()
