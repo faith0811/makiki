@@ -18,7 +18,7 @@ requires = [
 
 setup(
     name='makiki',
-    version='0.1.7',
+    version='0.1.8',
     description='Web service utils and generator.',
     long_description='',
     author='Wang Yanqing',
