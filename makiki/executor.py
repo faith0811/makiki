@@ -99,11 +99,15 @@ class FunctionExecutor(object):
         def wrapper(*args, **kwargs):
             start = time.time()
             request = kwargs.get('request')
-            if request and 'request' not in func.__code__.co_varnames:
-                del kwargs['request']
+            if request:
+                _of = getattr(func, 'original', func)
+                if 'request' not in _of.__code__.co_varnames:
+                    del kwargs['request']
             response = kwargs.get('response')
-            if response and 'response' not in func.__code__.co_varnames:
-                del kwargs['response']
+            if response:
+                _of = getattr(func, 'original', func)
+                if 'response' not in _of.__code__.co_varnames:
+                    del kwargs['response']
             try:
                 return self._process(func, args, kwargs, request, response)
             except falcon.http_status.HTTPStatus:
