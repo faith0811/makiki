@@ -80,7 +80,9 @@ def make_send_task(async_api, apply_queue):
     return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue)
 
 
-def send_task(async_api, module_name, api_name, *args, countdown=0, apply_queue=None, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
+def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_queue=None, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
+    if not async_api or not apply_queue:
+        raise RuntimeError('create send_task using make_send_task.')
     task = AsyncTask(
         module_name=module_name,
         func_name=api_name,
