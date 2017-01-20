@@ -99,10 +99,10 @@ class FunctionExecutor(object):
         def wrapper(*args, **kwargs):
             start = time.time()
             request = kwargs.get('request')
-            if request:
+            if request and 'request' not in func.__code__.co_varnames:
                 del kwargs['request']
             response = kwargs.get('response')
-            if response:
+            if response and 'response' not in func.__code__.co_varnames:
                 del kwargs['response']
             try:
                 return self._process(func, args, kwargs, request, response)
