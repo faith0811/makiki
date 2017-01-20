@@ -109,7 +109,7 @@ def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_q
     return task.task_id
 
 
-def async_task(self, module_name, api_name, *args, retry_wait=5, func_executor=None, **kwargs):
+def async_task(self, module_name, api_name, retry_wait=5, func_executor=None, *args, **kwargs):
     try:
         mod = importlib.import_module(module_name)
         func = getattr(mod, api_name)
