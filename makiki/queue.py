@@ -28,14 +28,12 @@ class AsyncTask(object):
     __slots__ = (
         'task_id', 'module_name', 'func_name', 'args', 'kwargs',
         'countdown', 'send_after_commit', 'extra_celery_kwargs', 'apply_queue',
-        'retry_wait', 'function_executor',
     )
 
     def __init__(
             self, module_name, func_name, args=None, kwargs=None,
             countdown=0, send_after_commit=False,
             apply_queue='queue', extra_celery_kwargs=None,
-            retry_wait=5, function_executor=lambda x: x,
     ):
         mod = importlib.import_module(module_name)
         if not hasattr(mod, func_name):
@@ -49,8 +47,6 @@ class AsyncTask(object):
         self.send_after_commit = bool(send_after_commit)
         self.extra_celery_kwargs = extra_celery_kwargs if extra_celery_kwargs is not None else {}
         self.apply_queue = apply_queue
-        self.retry_wait = retry_wait
-        self.function_executor = function_executor
 
     def register(self):
         if self.send_after_commit:
@@ -65,8 +61,6 @@ class AsyncTask(object):
         return async_api.si(
             self.module_name, self.func_name,
             *self.args,
-            retry_wait=self.retry_wait,
-            function_executor=self.function_executor,
             **self.kwargs
         ).apply_async(
             countdown=self.countdown,
@@ -87,7 +81,7 @@ def make_send_task(async_api, apply_queue, func_executor=lambda x: x, retry_wait
     return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue, func_executor=func_executor, retry_wait=retry_wait)
 
 
-def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_queue=None, send_after_commit=False, retry_wait=5, func_executor=None, extra_celery_kwargs=None, **kwargs):
+def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_queue=None, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
     if not async_api or not apply_queue:
         raise RuntimeError('create send_task using make_send_task.')
     task = AsyncTask(
@@ -99,14 +93,16 @@ def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_q
         send_after_commit=send_after_commit,
         extra_celery_kwargs=extra_celery_kwargs,
         apply_queue=apply_queue,
-        retry_wait=retry_wait,
-        func_executor=func_executor,
     )
     if send_after_commit:
         task.register()
     else:
         task.send(async_api)
     return task.task_id
+
+
+def make_async_task(function_executor, retry_wait=5):
+    return functools.partial(async_task, function_executor=function_executor, retry_wait=retry_wait)
 
 
 def async_task(self, module_name, api_name, retry_wait=5, func_executor=None, *args, **kwargs):
@@ -118,7 +114,7 @@ def async_task(self, module_name, api_name, retry_wait=5, func_executor=None, *a
         self.retry(exc=e, countdown=retry_wait)
 
 
-def register_to_celery(celery_broker, celery_config, max_retries=12, DBSession=None):
+def register_to_celery(celery_broker, celery_config, async_task, max_retries=12, DBSession=None):
 
     broker = 'amqp://{user}:{password}@{host}:{port}/{vhost}'.\
         format(**celery_broker)
