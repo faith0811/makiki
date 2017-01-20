@@ -102,8 +102,8 @@ def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_q
 
 
 def make_async_task(function_executor, retry_wait=5):
-    def _f(module_name, api_name, *args, **kwargs):
-        return async_task(module_name, api_name, retry_wait, function_executor, *args, **kwargs)
+    def _f(self, module_name, api_name, *args, **kwargs):
+        return async_task(self, module_name, api_name, retry_wait, function_executor, *args, **kwargs)
     return _f
 
 
