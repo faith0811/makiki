@@ -77,8 +77,8 @@ def send_after_commit_tasks(session):
     delattr(async_ctx, 'reged_tasks')
 
 
-def make_send_task(async_api, apply_queue, func_executor=lambda x: x, retry_wait=5):
-    return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue, func_executor=func_executor, retry_wait=retry_wait)
+def make_send_task(async_api, apply_queue):
+    return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue)
 
 
 def send_task(module_name, api_name, *args, countdown=0, async_api=None, apply_queue=None, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
