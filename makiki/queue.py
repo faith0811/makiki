@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 async_ctx = local()
 
 
-class NestorAsyncTask(object):
+class AsyncTask(object):
     __slots__ = (
         'task_id', 'module_name', 'func_name', 'args', 'kwargs',
         'countdown', 'send_after_commit', 'extra_celery_kwargs', 'apply_queue',
@@ -60,7 +60,7 @@ class NestorAsyncTask(object):
     def send(self, async_api):
         return async_api.si(
             self.module_name, self.func_name,
-            *self.args, nestor_task_id=self.task_id, **self.kwargs
+            *self.args, **self.kwargs
         ).apply_async(
             countdown=self.countdown,
             queue=self.apply_queue,
@@ -81,7 +81,7 @@ def make_send_task(async_api):
 
 
 def send_task(async_api, module_name, api_name, *args, countdown=0, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
-    task = NestorAsyncTask(
+    task = AsyncTask(
         module_name=module_name,
         func_name=api_name,
         args=args,
@@ -110,10 +110,10 @@ def register_to_celery(celery_broker, celery_config, func_executor, retry_wait=5
     broker = 'amqp://{user}:{password}@{host}:{port}/{vhost}'.\
         format(**celery_broker)
 
-    celery_app = Celery(broker=broker)
-    celery_app.conf.update(**celery_config)
+    app = Celery(broker=broker)
+    app.conf.update(**celery_config)
 
-    async_api = celery_app.task(max_retries=max_retries, bind=True)(async_task)
+    async_api = app.task(max_retries=max_retries, bind=True)(async_task)
     signals.setup_logging.connect(init_celery_log)
     if DBSession:
         if event:
@@ -121,7 +121,7 @@ def register_to_celery(celery_broker, celery_config, func_executor, retry_wait=5
         else:
             raise ImportError('You must install sqlalchemy first.')
 
-    return async_api
+    return app, async_api
 
 
 def init_celery_log(loglevel=logging.INFO, **kwargs):
