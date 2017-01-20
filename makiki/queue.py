@@ -99,7 +99,7 @@ def send_task(async_api, module_name, api_name, *args, countdown=0, send_after_c
 
 def register_to_celery(celery_broker, celery_config, func_executor, retry_wait=5, max_retries=12, DBSession=None):
 
-    def async_task(self, module_name, api_name, *args, nestor_task_id=None, **kwargs):
+    def async_task(self, module_name, api_name, *args, **kwargs):
         try:
             mod = importlib.import_module(module_name)
             func = getattr(mod, api_name)
