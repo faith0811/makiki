@@ -63,9 +63,9 @@ def gather_parameters(self, request, response, api_version=None, **input_paramet
     """Gathers and returns all parameters that will be used for this endpoint"""
     # Mock the function parameters and add request into it
     if 'request' not in self.parameters:
-        self.parameters = (*self.parameters, 'request')
-    if 'request' not in self.parameters:
-        self.parameters = (*self.parameters, 'response')
+        self.parameters = tuple(list(self.parameters) + ['request'])
+    if 'response' not in self.parameters:
+        self.parameters = tuple(list(self.parameters) + ['response'])
     input_parameters.update(request.params)
     if self.parse_body and request.content_length is not None:
         body = request.stream
