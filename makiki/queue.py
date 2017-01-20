@@ -33,7 +33,7 @@ class AsyncTask(object):
     def __init__(
             self, module_name, func_name, args=None, kwargs=None,
             countdown=0, send_after_commit=False,
-            apply_queue='wedding_queue', extra_celery_kwargs=None,
+            apply_queue='queue', extra_celery_kwargs=None,
     ):
         mod = importlib.import_module(module_name)
         if not hasattr(mod, func_name):
@@ -76,11 +76,11 @@ def send_after_commit_tasks(session):
     delattr(async_ctx, 'reged_tasks')
 
 
-def make_send_task(async_api):
-    return functools.partial(send_task, async_api=async_api)
+def make_send_task(async_api, apply_queue):
+    return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue)
 
 
-def send_task(async_api, module_name, api_name, *args, countdown=0, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
+def send_task(async_api, module_name, api_name, *args, countdown=0, apply_queue=None, send_after_commit=False, extra_celery_kwargs=None, **kwargs):
     task = AsyncTask(
         module_name=module_name,
         func_name=api_name,
