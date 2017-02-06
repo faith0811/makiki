@@ -22,6 +22,7 @@ hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
 class FunctionExecutor(object):
 
     def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None):
+        self.has_http_wrapper = bool(http_wrapper)
         self.http_wrapper = http_wrapper if http_wrapper else lambda d, s, m, c: d
         self.sentry_client = sentry_client
         self.auth_func = auth_func if auth_func else lambda req, func: True
@@ -67,7 +68,7 @@ class FunctionExecutor(object):
             func_name, ', '.join(args_str), execution_time)
 
     def _process_exception_output(self, e, func_logger, request, response):
-        if self.http_wrapper:
+        if self.has_http_wrapper:
             if isinstance(e, BasicUserException):
                 return self._http_wrapper(
                     status=e.identity.http_code,
