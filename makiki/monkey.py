@@ -59,6 +59,19 @@ def wraps(function):
 #     return doc
 
 
+def call_function(self, **parameters):
+    """Let request/response got by interface, even the interface has no kwargs.
+
+    :param self:
+    :param parameters:
+    :return:
+    """
+    # if not self.interface.takes_kwargs:
+    #     parameters = {key: value for key, value in parameters.items() if key in self.all_parameters}
+
+    return self.interface(**parameters)
+
+
 def gather_parameters(self, request, response, api_version=None, **input_parameters):
     """Gathers and returns all parameters that will be used for this endpoint"""
     # Mock the function parameters and add request into it
@@ -99,3 +112,4 @@ def patch():
     functools.wraps = wraps
     # hug.interface.Interface.documentation = documentation
     hug.interface.HTTP.gather_parameters = gather_parameters
+    hug.interface.HTTP.call_function = call_function
