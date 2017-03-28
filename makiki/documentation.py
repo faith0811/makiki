@@ -23,6 +23,7 @@ class Documentation(object):
             'schemes': ['http'] if schemas is None else schemas,
             'consumes': ['application/json'] if consumes is None else consumes,
             'produces': ['application/json'] if produces is None else produces,
+            'basePath': base_path,
             'paths': {},
         }
         self.parse_hug_doc(hug_doc)
