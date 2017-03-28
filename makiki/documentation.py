@@ -12,7 +12,7 @@ class Documentation(object):
         'Multiple Values': 'array',
     }
 
-    def __init__(self, hug_doc, version='1.0', title='REST API', host='localhost', schemas=None, consumes=None, produces=None):
+    def __init__(self, hug_doc, version='1.0', title='REST API', host='localhost', schemas=None, consumes=None, produces=None, base_path='/'):
         self._content = {
             'swagger': '2.0',
             'info': {
