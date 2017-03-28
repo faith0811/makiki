@@ -32,7 +32,7 @@ class Documentation(object):
             self._content['paths'][url] = {}
             for method, detail in spec.items():
                 self._content['paths'][url][method.lower()] = {
-                    'description': detail.get('usage', ''),
+                    'description': detail.get('usage', url),
                     'parameters': [{
                         'name': k,
                         'in': 'query' if method == 'GET' else 'body',
