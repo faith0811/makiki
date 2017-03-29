@@ -36,7 +36,7 @@ class Documentation(object):
                     'description': detail.get('usage', url),
                     'parameters': [{
                         'name': k,
-                        'in': 'query' if method == 'GET' else 'body',
+                        'in': self._located_in(k, url, method),
                         'required': 'default' not in v,
                         'type': self.HUG_TYPE_TRANSLATION.get(v.get('type', ''), 'any'),
                     } for k, v in detail.get('inputs', {}).items()],
@@ -46,6 +46,15 @@ class Documentation(object):
                         }
                     }
                 }
+
+    @staticmethod
+    def _located_in(key, url, method):
+        if '{}{}{}'.format('{', key, '}') in url:
+            return 'path'
+        elif method == 'GET':
+            return 'query'
+        else:
+            return 'formData'
 
     @property
     def content(self):
