@@ -80,7 +80,7 @@ def gather_parameters(self, request, response, api_version=None, **input_paramet
     if 'response' not in self.parameters:
         self.parameters = tuple(list(self.parameters) + ['response'])
     input_parameters.update(request.params)
-    if self.parse_body and request.content_length is not None:
+    if self.parse_body and request.content_length:
         body = request.stream
         content_type, ct_params = parse_header(request.content_type)
         body_formatter = body and self.api.http.input_format(content_type)
