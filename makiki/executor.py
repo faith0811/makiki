@@ -46,7 +46,7 @@ class FunctionExecutor(object):
     def _send_sentry_exc(self, request):
         if self.sentry_client:
             if request:
-                self.sentry_clinet.http_context({
+                self.sentry_client.http_context({
                     'url': request.url,
                     'query_string': request.query_string,
                     'method': request.method,
