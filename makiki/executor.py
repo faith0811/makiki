@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
 import sys
 import logging
 import functools
@@ -55,8 +54,8 @@ class FunctionExecutor(object):
                     'headers': request.headers,
                 })
             self.sentry_client.extra_context({
-                'args': json.dumps(args),
-                'kwargs': json.dumps(kwargs),
+                'args': args,
+                'kwargs': kwargs,
             })
             self.sentry_client.captureException()
 
