@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import sys
 import logging
 import functools
@@ -43,16 +44,22 @@ class FunctionExecutor(object):
 
         return self._http_wrapper(data=func(*args, **kwargs))
 
-    def _send_sentry_exc(self, request):
+    def _send_sentry_exc(self, request, args, kwargs):
+        sentry_kwargs = {
+            'extra_context': {
+                'args': json.dumps(args),
+                'kwargs': json.dumps(kwargs),
+            },
+        }
         if self.sentry_client:
             if request:
-                self.sentry_client.http_context({
+                sentry_kwargs['http_context'] = {
                     'url': request.url,
                     'query_string': request.query_string,
                     'method': request.method,
                     'headers': request.headers,
-                })
-            self.sentry_client.captureException()
+                }
+            self.sentry_client.captureException(**sentry_kwargs)
 
     def _prepare_log(self, func_name, args, kwargs, execution_time, request):
         if self.identity_func:
@@ -67,7 +74,7 @@ class FunctionExecutor(object):
         return '{}({}) response {}ms'.format(
             func_name, ', '.join(args_str), execution_time)
 
-    def _process_exception_output(self, e, func_logger, request, response):
+    def _process_exception_output(self, e, func_logger, request, response, args, kwargs):
         if self.has_http_wrapper:
             if isinstance(e, BasicUserException):
                 return self._http_wrapper(
@@ -77,7 +84,7 @@ class FunctionExecutor(object):
                     response=response,
                 )
             else:
-                self._send_sentry_exc(request)
+                self._send_sentry_exc(request, args, kwargs)
                 func_logger.exception(e)
                 return self._http_wrapper(
                     status=500,
@@ -114,7 +121,7 @@ class FunctionExecutor(object):
             except falcon.http_status.HTTPStatus:
                 raise
             except Exception as e:
-                return self._process_exception_output(e, func_logger, request, response)
+                return self._process_exception_output(e, func_logger, request, response, args, kwargs)
             finally:
                 execution_time = (time.time() - start) * 1000
                 self._finish_exec(execution_time, func_logger, args, kwargs, request, func)
