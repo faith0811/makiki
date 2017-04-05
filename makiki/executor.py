@@ -45,21 +45,19 @@ class FunctionExecutor(object):
         return self._http_wrapper(data=func(*args, **kwargs))
 
     def _send_sentry_exc(self, request, args, kwargs):
-        sentry_kwargs = {
-            'extra_context': {
-                'args': json.dumps(args),
-                'kwargs': json.dumps(kwargs),
-            },
-        }
         if self.sentry_client:
             if request:
-                sentry_kwargs['http_context'] = {
+                self.sentry_client.http_context({
                     'url': request.url,
                     'query_string': request.query_string,
                     'method': request.method,
                     'headers': request.headers,
-                }
-            self.sentry_client.captureException(**sentry_kwargs)
+                })
+            self.sentry_client.extra_context({
+                'args': json.dumps(args),
+                'kwargs': json.dumps(kwargs),
+            })
+            self.sentry_client.captureException()
 
     def _prepare_log(self, func_name, args, kwargs, execution_time, request):
         if self.identity_func:
