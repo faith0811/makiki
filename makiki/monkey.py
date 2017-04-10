@@ -66,8 +66,9 @@ def call_function(self, **parameters):
     :param parameters:
     :return:
     """
-    # if not self.interface.takes_kwargs:
-    #     parameters = {key: value for key, value in parameters.items() if key in self.all_parameters}
+    all_parameters = ('request', 'response', *self.all_parameters)
+    if not self.interface.takes_kwargs:
+        parameters = {key: value for key, value in parameters.items() if key in all_parameters}
 
     return self.interface(**parameters)
 
