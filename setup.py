@@ -13,7 +13,7 @@ requires = [
     'Jinja2>=2.8.1',
     'psycogreen>=1.0.0',
     'psycopg2>=2.6.2',
-    'hug>=2.1.2',
+    'hug==2.2.0',
 ]
 
 setup(
