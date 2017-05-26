@@ -1,4 +1,6 @@
 language: python
+script:
+  - 'echo hello'
 deploy:
   provider: pypi
   on:
