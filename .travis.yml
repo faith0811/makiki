@@ -1,5 +1,8 @@
 language: python
-branches:
-  only:
-  - master
-script:
+deploy:
+  provider: pypi
+  on:
+    tags: true
+  user: faith0811
+  password:
+    secure: BfWTo0agh/ONxYkyoxZWSaYmyixdDP+Lm5bQcI3da6dHSyGjBy4w+PH5l0nPnZ1kSuJIKjG7t1QtsY95iJcCX7qHKopbA93P+MzKCm0CcApREydD9lZZU49nylmrEG+QGHnNamA1UtBXYJCnJ8Fp4OO7lq2fxwWc5LBSVDLrRuXWutOGhzgmisip30Kh8zFYS6LcFJVX0LGiFw+TI40dmpVkI8DoVp/M1iyX81qHWjjdXPu6Z+zuwoff+AiEEsuWs4Tv9/PeH/XYYV+QF47gT1iufJkeo3nu0UXDm0rP2dyYHZh8vM94DZowTLMLDK95sjgnRB6mLyEAMMepaT9esdN4yY/c+4UOHBVI0yDpDg2GkqTwBIzqwe86GmmA2iDzh0sBUwRsPd8tsbk29soXE7LvVhkUj9QKLaHXpvWoztkZZou5ZUa4tDHH76d4+XrSejA/Bmpuey9Hb8v9CQCH6wVDu3+oJzNqWGbH1IZKr7C7s3Od+iAOTCnEXx3Thml8gKAPomZPKbGVCZtUdXCjJ3gaC4Fmvs8mL5GnhWNQSOkap4NSPmvH3PYhjHW1C0ZGrQFG34WryKjl3u5y8bFepbCb5u5kmYTtXt39JACIudsFIGHQg7l1e8GW6IETI9sRSliXZaajNB69ZSIGPeBXj4s+ULKoxacMzJD81p/QkFE=
