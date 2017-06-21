@@ -44,7 +44,7 @@ class FunctionExecutor(object):
             raise Unauthorized
 
         if self.thrift_wrapper:
-            return self.thrift_wrapper(func(*args, **kwargs))
+            return self.thrift_wrapper(func)(*args, **kwargs)
         return self._http_wrapper(data=func(*args, **kwargs))
 
     def _send_sentry_exc(self, request, args, kwargs):
