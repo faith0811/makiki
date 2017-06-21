@@ -21,9 +21,10 @@ hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
 
 class FunctionExecutor(object):
 
-    def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None, log_error=False):
+    def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None, log_error=False, thrift_wrapper=None):
         self.has_http_wrapper = bool(http_wrapper)
         self.http_wrapper = http_wrapper if http_wrapper else lambda d, s, m, c: d
+        self.thrift_wrapper = thrift_wrapper
         self.sentry_client = sentry_client
         self.auth_func = auth_func if auth_func else lambda req, func: True
         self.log_exclude_fields = log_exclude_fields if log_exclude_fields is not None else {}
@@ -42,6 +43,8 @@ class FunctionExecutor(object):
         if not self.auth_func(request, func):
             raise Unauthorized
 
+        if self.thrift_wrapper:
+            return self.thrift_wrapper(func(*args, **kwargs))
         return self._http_wrapper(data=func(*args, **kwargs))
 
     def _send_sentry_exc(self, request, args, kwargs):
