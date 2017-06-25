@@ -69,14 +69,6 @@ class AsyncTask(object):
         )
 
 
-def send_after_commit_tasks(session, async_api):
-    if not hasattr(async_ctx, 'reged_tasks'):
-        return
-    for task in async_ctx.reged_tasks:
-        task.send(async_api)
-    delattr(async_ctx, 'reged_tasks')
-
-
 def make_send_task(async_api, apply_queue):
     return functools.partial(send_task, async_api=async_api, apply_queue=apply_queue)
 
@@ -117,6 +109,12 @@ def async_task(self, module_name, api_name, retry_wait=5, func_executor=None, *a
 
 
 def register_to_celery(celery_broker, celery_config, async_task, max_retries=12, DBSession=None):
+    def send_after_commit_tasks(session):
+        if not hasattr(async_ctx, 'reged_tasks'):
+            return
+        for task in async_ctx.reged_tasks:
+            task.send(async_api)
+        delattr(async_ctx, 'reged_tasks')
 
     broker = 'amqp://{user}:{password}@{host}:{port}/{vhost}'.\
         format(**celery_broker)
@@ -128,7 +126,7 @@ def register_to_celery(celery_broker, celery_config, async_task, max_retries=12,
     signals.setup_logging.connect(init_celery_log)
     if DBSession:
         if event:
-            event.listens_for(DBSession, 'after_commit')(send_after_commit_tasks, async_api)
+            event.listens_for(DBSession, 'after_commit')(send_after_commit_tasks)
         else:
             raise ImportError('You must install sqlalchemy first.')
 
