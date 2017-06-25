@@ -21,7 +21,7 @@ with open('README.rst', 'r') as f:
 
 setup(
     name='makiki',
-    version='0.2.17',
+    version='0.2.18',
     description='Web service utils and generator.',
     long_description=readme,
     license='MIT',
