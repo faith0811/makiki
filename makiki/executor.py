@@ -21,7 +21,7 @@ hub.NOT_ERROR = tuple(list(hub.NOT_ERROR) + [falcon.http_status.HTTPStatus])
 
 class FunctionExecutor(object):
 
-    def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None, log_error=False, thrift_wrapper=None):
+    def __init__(self, http_wrapper=None, sentry_client=None, auth_func=None, log_exclude_fields=None, identity_func=None, log_error=False, thrift_wrapper=None, timeout=None):
         self.has_http_wrapper = bool(http_wrapper)
         self.http_wrapper = http_wrapper if http_wrapper else lambda d, s, m, c: d
         self.thrift_wrapper = thrift_wrapper
@@ -30,6 +30,7 @@ class FunctionExecutor(object):
         self.log_exclude_fields = log_exclude_fields if log_exclude_fields is not None else {}
         self.identity_func = identity_func
         self.log_error = log_error
+        self.timeout = timeout
 
     def _http_wrapper(self, data=None, status=200, message='Success', code=0, response=None):
         if response:
@@ -121,7 +122,12 @@ class FunctionExecutor(object):
                 if 'response' not in _of.__code__.co_varnames:
                     del kwargs['response']
             try:
-                return self._process(func, args, kwargs, request, response)
+                if self.timeout:
+                    with gevent.Timeout(self.timeout):
+                        return self._process(func, args, kwargs, request, response)
+                else:
+                    return self._process(func, args, kwargs, request, response)
+
             except falcon.http_status.HTTPStatus:
                 raise
             except Exception as e:
