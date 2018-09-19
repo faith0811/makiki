@@ -129,7 +129,6 @@ def register_to_celery(celery_broker, celery_config, async_task, max_retries=12,
     app.conf.update(**celery_config)
 
     async_api = app.task(max_retries=max_retries, bind=True)(async_task)
-    signals.setup_logging.connect(init_celery_log)
     if DBSession:
         if event:
             event.listens_for(DBSession, 'after_commit')(send_after_commit_tasks)
